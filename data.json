@@ -1,0 +1,10 @@
+{
+    "servers": [
+        {
+            "allow_on_cloudflare": true,
+            "first_online": null,
+            "on_cloudflare": false,
+            "server_ip": "YOUR_SERVER_IP_ADDRESS"
+        }
+    ]
+}
