@@ -101,10 +101,13 @@ def check_all_servers():
         server_ip = server['server_ip']
         offline = False
         ping = get_latency_or_offline(server_ip)
-        if ping is None or ping > 500:
-            time.sleep(1)
-            ping = get_latency_or_offline(server_ip)
-            if ping is None or ping > 300:
+        if ping is None or ping > 1500:
+            if server['first_online'] is not None:
+                time.sleep(5)
+                ping = get_latency_or_offline(server_ip)
+                if ping is None or ping > 1500:
+                    offline = True
+            else:
                 offline = True
         if not offline and server['first_online'] is None:
             server['first_online'] = now
