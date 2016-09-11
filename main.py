@@ -100,15 +100,16 @@ def check_all_servers():
     for server in data['servers']:
         server_ip = server['server_ip']
         offline = False
-        ping = get_latency_or_offline(server_ip)
-        if ping is None or ping > 1500:
+        success, latency_or_error = get_latency_or_offline(server_ip)
+        if not success or latency_or_error > 1500:
             if server['first_online'] is not None:
                 time.sleep(5)
-                ping = get_latency_or_offline(server_ip)
-                if ping is None or ping > 1500:
+                success, latency_or_error = get_latency_or_offline(server_ip)
+                if not success or latency_or_error > 1500:
                     offline = True
             else:
                 offline = True
+        server['last_latency_or_error'] = latency_or_error
         if not offline and server['first_online'] is None:
             server['first_online'] = now
         elif offline:
@@ -130,7 +131,9 @@ def check_all_servers():
             if on_cloudflare > 1:
                 if remove_from_cloudflare(server['server_ip']):
                     sent_notification = True
-                    send_telegram_message("Removed server " + server['server_ip'] + " from cloudflare, it was offline!")
+                    send_telegram_message("Removed server " + server['server_ip'] +
+                                          " from cloudflare, i wasn't able to ping it\nError: " +
+                                          server['last_latency_or_error'])
                     server['on_cloudflare'] = False
                     on_cloudflare -= 1
         elif server['allow_on_cloudflare'] and not server['on_cloudflare'] and server['first_online'] is not None and\
@@ -161,10 +164,10 @@ def get_latency_or_offline(server_ip):
         # MinecraftServer.lookup(server_ip)
         latency = server.status(retries=1).latency
         print("Server " + server_ip + " is online (latency: " + str(latency) + "ms)")
-        return latency
+        return True, latency
     except Exception as e:
         print("Server " + server_ip + " is offline " + str(e))
-        return None
+        return False, str(e)
 
 
 while True:
