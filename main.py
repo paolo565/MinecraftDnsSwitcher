@@ -133,7 +133,7 @@ def check_all_servers():
                     sent_notification = True
                     send_telegram_message("Removed server " + server['server_ip'] +
                                           " from cloudflare, i wasn't able to ping it\nError: " +
-                                          server['last_latency_or_error'])
+                                          str(server['last_latency_or_error']))
                     server['on_cloudflare'] = False
                     on_cloudflare -= 1
         elif server['allow_on_cloudflare'] and not server['on_cloudflare'] and server['first_online'] is not None and\
